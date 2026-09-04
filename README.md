@@ -39,3 +39,17 @@ ssh <kali-user>@192.168.56.20
 
 
 All testing is performed in a controlled virtual lab using synthetic data. Attack simulations must only be conducted against systems owned by or explicitly authorised for this project.
+
+
+## Synthetic Data
+The project uses a synthetically generated dataset containing 5,000 records. 
+No real personal information is used.
+
+Each raw record contains the following attributes:
+- `record_id`
+- `age`
+- `postcode`
+- `income`
+- `occupation`
+
+Income is generated using occupation-specific salary ranges with a weak age dependency to introduce realistic variation while maintaining fully synthetic data. 
