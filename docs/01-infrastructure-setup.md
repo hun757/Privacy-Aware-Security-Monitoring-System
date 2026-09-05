@@ -137,6 +137,94 @@ ssh kali@192.168.56.20
 | Windows → Kali Linux    | Successful |
 
 ---
+## 🔎 Verification and Test Evidence
+
+The infrastructure was validated through interface checks, ICMP connectivity tests, SSH connection tests, and packet capture.
+
+### 1. Verify Interface Addresses
+
+Ubuntu Server:
+
+```bash
+ip -br address
+```
+
+Expected Host-only interface:
+
+```text
+enp0s8    UP    192.168.56.10/24
+```
+
+Kali Linux:
+
+```bash
+ip -br address
+```
+
+Expected Host-only interface:
+
+```text
+eth1      UP    192.168.56.20/24
+```
+
+### 2. Verify VM-to-VM Connectivity
+
+With both virtual machines running, test the isolated Host-only network.
+
+From Kali Linux:
+
+```bash
+ping -c 4 192.168.56.10
+```
+
+From Ubuntu Server:
+
+```bash
+ping -c 4 192.168.56.20
+```
+
+A successful response confirms that Kali and Ubuntu can communicate through the isolated Host-only network.
+
+### 3. Verify SSH Connectivity from Windows
+
+Windows PowerShell was used to verify remote administration access.
+
+```powershell
+ssh jeonghun@192.168.56.10
+ssh kali@192.168.56.20
+```
+
+| Test                 | Result     |
+| -------------------- | ---------- |
+| Windows → Ubuntu SSH | Successful |
+| Windows → Kali SSH   | Successful |
+
+### 4. Verify SSH Port Availability
+
+The SSH port on Kali was tested from Windows.
+
+```powershell
+Test-NetConnection 192.168.56.20 -Port 22
+```
+
+The test confirmed that TCP port `22` was reachable from the Windows Host-only adapter.
+
+### 5. Packet-Level Verification
+
+A packet capture was performed on Kali to verify ARP resolution and the SSH TCP handshake.
+
+```bash
+sudo tcpdump -eni eth1 'arp or tcp port 22'
+```
+
+The capture confirmed:
+
+* Windows successfully resolved Kali's MAC address using ARP.
+* The TCP three-way handshake to port `22` completed.
+* Kali responded with an OpenSSH server banner.
+
+This provided evidence that the Host-only network and Kali SSH service were operating correctly.
+---
 
 ## 🧪 Troubleshooting and Findings
 
