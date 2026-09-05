@@ -224,8 +224,8 @@ The capture confirmed:
 * Kali responded with an OpenSSH server banner.
 
 This provided evidence that the Host-only network and Kali SSH service were operating correctly.
----
 
+---
 ## 🧪 Troubleshooting and Findings
 
 During the setup process, the Kali Host-only interface initially did not receive a stable DHCP IPv4 address.
