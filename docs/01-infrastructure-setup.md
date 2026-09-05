@@ -1,6 +1,6 @@
 # Infrastructure Setup
 
- Initial virtual security lab environment for the Privacy-Aware Security Monitoring System.
+> Initial virtual security lab environment for the Privacy-Aware Security Monitoring System.
 
 ---
 
@@ -182,6 +182,10 @@ From Ubuntu Server:
 ```bash
 ping -c 4 192.168.56.20
 ```
+| Test | Result |
+| --- | --- |
+| Kali → Ubuntu ping | Successful |
+| Ubuntu → Kali ping | Successful |
 
 A successful response confirms that Kali and Ubuntu can communicate through the isolated Host-only network.
 
@@ -247,7 +251,7 @@ This confirmed that the Host-only network and SSH service were working correctly
 * NAT is retained only for outbound Internet access.
 * SSH is used instead of direct VirtualBox console access for server administration.
 * Passwords, SSH private keys, API keys, and TryHackMe VPN configuration files must never be committed to this repository.
-* Future attack simulations will be performed only against the authorised Ubuntu VM inside this controlled lab.
+* Future attack simulations will be performed only against the authorized Ubuntu VM inside this controlled lab.
 
 ---
 
