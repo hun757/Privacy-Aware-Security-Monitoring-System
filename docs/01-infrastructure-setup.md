@@ -1,6 +1,6 @@
 # Infrastructure Setup
 
-> Initial virtual security lab environment for the Privacy-Aware Security Monitoring System.
+ Initial virtual security lab environment for the Privacy-Aware Security Monitoring System.
 
 ---
 
