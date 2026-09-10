@@ -35,7 +35,18 @@ def health_check():
     """Basic route so you can confirm the server is running at all."""
     return jsonify({"status": "ok", "service": "Security Monitoring & Privacy System API"})
 
-
+def log_access(user_id, username, action):
+    """로그인 시도 기록을 access_log 테이블에 남긴다 (누가/언제/성공인지)."""
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO access_log (user_id, username, action, ip_address) "
+            "VALUES (%s, %s, %s, %s)",
+            (user_id, username, action, request.remote_addr),
+        )
+        conn.commit()
+        cursor.close()
+        
 @app.route("/login", methods=["POST"])
 def login():
     data = request.get_json(silent=True) or {}
@@ -57,6 +68,7 @@ def login():
     if not user or not check_password_hash(user["password_hash"], password):
         # Same error for "no such user" and "wrong password" — don't leak
         # which one it was, that's a basic security hygiene practice.
+        log_access(None, username, "login_failed")
         return jsonify({"error": "invalid username or password"}), 401
 
     token = jwt.encode(
@@ -68,6 +80,8 @@ def login():
         JWT_SECRET,
         algorithm="HS256",
     )
+
+    log_access(user["user_id"], user["username"], "login_success")
 
     return jsonify({"token": token, "expires_in_hours": JWT_EXPIRY_HOURS})
 
