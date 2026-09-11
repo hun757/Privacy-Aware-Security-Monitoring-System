@@ -255,3 +255,28 @@ This confirmed that the Host-only network and SSH service were working correctly
 
 ---
 
+🐍 Python Virtual Environment
+
+A project-specific Python virtual environment was created inside the repository.
+
+cd ~/projects/privacy-security-monitor
+python3 -m venv .venv
+source .venv/bin/activate
+
+A successful activation displays (.venv) at the beginning of the terminal prompt.
+
+(.venv) jeonghun@psm-ubuntu-server:~/projects/privacy-security-monitor$
+
+The virtual environment isolates project dependencies from the Ubuntu system Python installation.
+
+The following dependencies required by the team API were installed:
+
+Flask
+PyJWT
+python-dotenv
+mysql-connector-python
+
+The environment should be activated before running the application:
+
+cd ~/projects/privacy-security-monitor
+source .venv/bin/activate
