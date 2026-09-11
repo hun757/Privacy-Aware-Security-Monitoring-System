@@ -53,3 +53,48 @@ Each raw record contains the following attributes:
 - `occupation`
 
 Income is generated using occupation-specific salary ranges with a weak age dependency to introduce realistic variation while maintaining fully synthetic data. 
+
+The raw dataset is generated using `src/privacy/generate_data.py` and saved in `data/raw/synthetic_users.csv`.
+
+## Data Generalisation
+
+Four attributes were selected as quasi-identifiers: age, postcode, income, and occupation.
+
+These attributes are generalised to reduce the amount of specific information stored in the dataset.
+
+| Attribute | Generalisation | Example |
+| --- | --- | --- |
+| Age | 10-year age groups | `37` → `30-39` |
+| Postcode | Keep the first two digits | `2122` → `21**` |
+| Income | $10,000 ranges | `87,000` → `80k-90k` |
+| Occupation | Group similar occupations | `Data Analyst` → `Technology` |
+
+The generalised dataset contains:
+
+- `record_id`
+- `age_group`
+- `postcode_group`
+- `income_range`
+- `occupation_group`
+
+The generalised data is created using `src/privacy/generalise.py` and saved in `data/processed/generalised_users.csv`.
+
+## Record Uniqueness
+
+Record uniqueness was checked using the combination of the four generalised quasi-identifiers:
+
+- `age_group`
+- `postcode_group`
+- `income_range`
+- `occupation_group`
+
+The results for the 5,000 records were:
+
+- Total records: 5,000
+- Unique records: 25
+- Uniqueness rate: 0.5%
+- Smallest group size: 1
+
+A record is counted as unique when no other record has the same combination of the four quasi-identifiers.
+
+The result shows that most records share the same combination with at least one other record. However, 25 records still have a unique combination.
