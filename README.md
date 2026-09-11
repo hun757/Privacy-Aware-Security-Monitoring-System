@@ -69,32 +69,36 @@ These attributes are generalised to reduce the amount of specific information st
 | Income | $10,000 ranges | `87,000` → `80k-90k` |
 | Occupation | Group similar occupations | `Data Analyst` → `Technology` |
 
-The generalised dataset contains:
 
-- `record_id`
-- `age_group`
-- `postcode_group`
-- `income_range`
-- `occupation_group`
+## Privacy Analysis
 
-The generalised data is created using `src/privacy/generalise.py` and saved in `data/processed/generalised_users.csv`.
+Privacy was evaluated by checking how many records share the same combination of the four generalised quasi-identifiers.
 
-## Record Uniqueness
 
-Record uniqueness was checked using the combination of the four generalised quasi-identifiers:
+### Record Uniqueness
 
-- `age_group`
-- `postcode_group`
-- `income_range`
-- `occupation_group`
+| Metric | Current | Stronger |
+| --- | ---: | ---: |
+| Unique records | 25 | 5 |
+| Uniqueness rate | 0.50% | 0.10% |
+| Records in groups of 5 or more | 4,764 | 4,941 |
+| Percentage in groups of 5 or more | 95.28% | 98.82% |
 
-The results for the 5,000 records were:
+The stronger generalisation reduced the number of unique records from 25 to 5. It also increased the number of records that share their quasi-identifier combination with at least four other records.
 
-- Total records: 5,000
-- Unique records: 25
-- Uniqueness rate: 0.5%
-- Smallest group size: 1
+### Privacy and Data Utility
 
-A record is counted as unique when no other record has the same combination of the four quasi-identifiers.
+Data utility was compared using the number of different categories remaining after generalisation.
 
-The result shows that most records share the same combination with at least one other record. However, 25 records still have a unique combination.
+| Attribute | Current | Stronger |
+| --- | ---: | ---: |
+| Age categories | 6 | 3 |
+| Postcode categories | 3 | 3 |
+| Income categories | 10 | 6 |
+| Occupation categories | 6 | 6 |
+
+The stronger generalisation reduced record uniqueness, but it also reduced some of the detail available for analysis.
+
+Age categories decreased from 6 to 3 and income categories decreased from 10 to 6. Postcode and occupation categories remained the same.
+
+This shows the trade-off between privacy and data utility: stronger generalisation can make records harder to distinguish, but it can also reduce the amount of detail available for analysis.
