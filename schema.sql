@@ -35,3 +35,25 @@ CREATE TABLE PROTECTED_DATA (
 --      at the DB permission level (e.g. the API's DB account has no
 --      SELECT grant on SYNTHETIC_DATA at all).
 -- ============================================================
+
+-- ============================================================
+-- Login & access logging (SCRUM-29, SCRUM-30)
+-- Separate from the project's dataset tables above.
+-- ============================================================
+
+CREATE TABLE users (
+    user_id       INT AUTO_INCREMENT PRIMARY KEY,
+    username      VARCHAR(50)  UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE access_log (
+    log_id      INT AUTO_INCREMENT PRIMARY KEY,
+    user_id     INT NULL,
+    username    VARCHAR(50),
+    action      VARCHAR(50) NOT NULL,
+    ip_address  VARCHAR(45),
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+) ENGINE=InnoDB;
