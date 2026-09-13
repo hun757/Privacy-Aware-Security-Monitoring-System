@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 import requests
 
 
-API_URL = "http://192.168.56.10:5001/"
+API_URL = "http://localhost:5001/"
 REQUEST_COUNT = 30
 INTERVAL_SECONDS = 0.2
 REQUEST_TIMEOUT_SECONDS = 5

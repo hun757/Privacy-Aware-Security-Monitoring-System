@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 import requests
 
 
-API_URL = "http://192.168.56.10:5001/"
+API_URL = "http://localhost:5001/"
 REQUEST_COUNT = 10
 MIN_DELAY_SECONDS = 2
 MAX_DELAY_SECONDS = 5

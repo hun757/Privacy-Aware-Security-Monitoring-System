@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 import requests
 
 
-LOGIN_URL = "http://192.168.56.10:5001/login"
+LOGIN_URL = "http://localhost:5001/login"
 TEST_USERNAME = "lab_test_user"
 INVALID_PASSWORD = "deliberately-wrong-password"
 ATTEMPT_COUNT = 8
