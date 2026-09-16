@@ -27,6 +27,7 @@ from db.db_connection import get_connection  # noqa: E402
 
 HIGH_RATE_THRESHOLD = 10            # requests per minute from one IP
 FAILED_LOGIN_RATIO_THRESHOLD = 0.5  # 50% or more failed logins
+BULK_ACCESS_RECORD_THRESHOLD = 1000 # total records returned per minute from on IP
 
 
 def fetch_access_logs():
@@ -36,7 +37,7 @@ def fetch_access_logs():
         cursor.execute(
             """
             SELECT log_id, ip_address, action, method, path,
-                   status_code, response_time_ms, created_at
+                   status_code, response_time_ms, records_returned, created_at
             FROM access_log
             ORDER BY created_at ASC
             """
@@ -88,6 +89,13 @@ def extract_features(rows):
             sum(response_times) / len(response_times) if response_times else None
         )
 
+        records_returned_values = [
+            r["records_returned"]
+            for r in bucket_rows
+            if r["records_returned"] is not None
+        ]
+        total_records_returned = sum(records_returned_values)
+
         features.append(
             {
                 "ip_address": ip_address,
@@ -102,6 +110,8 @@ def extract_features(rows):
                     else None
                 ),
                 "is_high_rate": request_count >= HIGH_RATE_THRESHOLD,
+                "total_records_returned": total_records_returned,
+                "is_bulk_access_suspect": total_records_returned >= BULK_ACCESS_RECORD_THRESHOLD,
                 "is_brute_force_suspect": (
                     failed_login_count >= 3
                     and failed_login_ratio >= FAILED_LOGIN_RATIO_THRESHOLD
@@ -115,9 +125,10 @@ def extract_features(rows):
 def print_features(features):
     print(
         f"{'IP':<15} {'Window Start':<20} {'Reqs':<5} {'Failed':<7} "
-        f"{'FailRatio':<10} {'Paths':<6} {'AvgMs':<8} {'HighRate':<9} {'BruteForce?'}"
+        f"{'FailRatio':<10} {'Paths':<6} {'AvgMs':<8} {'HighRate':<9} "
+        f"{'TotalRecs':<10} {'BulkAccess?':<12} {'BruteForce?'}"
     )
-    print("-" * 100)
+    print("-" * 130)
     for f in features:
         print(
             f"{f['ip_address']:<15} "
@@ -128,9 +139,10 @@ def print_features(features):
             f"{f['distinct_paths']:<6} "
             f"{str(f['avg_response_time_ms']):<8} "
             f"{str(f['is_high_rate']):<9} "
+            f"{f['total_records_returned']:<10} "
+            f"{str(f['is_bulk_access_suspect']):<12} "
             f"{f['is_brute_force_suspect']}"
         )
-
 
 if __name__ == "__main__":
     rows = fetch_access_logs()

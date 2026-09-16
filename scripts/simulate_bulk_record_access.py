@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 import requests
 
 
-API_URL = "http://192.168.56.10:5001/protected-data"
+API_URL = "http://localhost:5001/protected-data"
 REQUEST_COUNT = 5
 RECORDS_PER_REQUEST = 500
 DELAY_SECONDS = 2

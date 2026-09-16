@@ -19,6 +19,7 @@ import jwt
 from flask import Flask, request, jsonify, g
 from werkzeug.security import check_password_hash
 from dotenv import load_dotenv
+from functools import wraps
 
 from db.db_connection import get_connection  # reuse the module from SCRUM-27
 
@@ -53,8 +54,8 @@ def _log_every_request(response):
             cursor = conn.cursor()
             cursor.execute(
                 "INSERT INTO access_log "
-                "(user_id, username, action, method, path, status_code, response_time_ms, ip_address) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                "(user_id, username, action, method, path, status_code, response_time_ms, records_returned, ip_address) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 (
                     g.get("log_user_id"),
                     g.get("log_username"),
@@ -63,6 +64,7 @@ def _log_every_request(response):
                     request.path,
                     response.status_code,
                     elapsed_ms,
+                    g.get("log_records_returned"),
                     request.remote_addr,
                 ),
             )
@@ -121,6 +123,67 @@ def login():
 
     return jsonify({"token": token, "expires_in_hours": JWT_EXPIRY_HOURS})
 
+def _get_bearer_token():
+    """Pull the JWT out of the Authorization header, if present."""
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        return None
+    return auth_header[len("Bearer "):].strip()
+
+
+def require_auth(view_func):
+    """Decorator: only let requests through with a valid JWT from /login."""
+
+    @wraps(view_func)
+    def wrapped(*args, **kwargs):
+        token = _get_bearer_token()
+        if not token:
+            return jsonify({"error": "missing bearer token"}), 401
+        try:
+            payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "token expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "invalid token"}), 401
+
+        g.log_user_id = payload.get("user_id")
+        g.log_username = payload.get("username")
+        return view_func(*args, **kwargs)
+
+    return wrapped
+
+
+@app.route("/protected-data", methods=["GET"])
+@require_auth
+def get_protected_data():
+    """Serve generalised (protected) records, with pagination.
+
+    NOTE: requesting very large record counts repeatedly is exactly the
+    pattern SCRUM-38 (bulk record access detection) watches for.
+    """
+    try:
+        limit = int(request.args.get("limit", 50))
+        offset = int(request.args.get("offset", 0))
+    except ValueError:
+        return jsonify({"error": "limit and offset must be integers"}), 400
+
+    limit = max(1, min(limit, 1000))
+    offset = max(0, offset)
+
+    with get_connection() as conn:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT record_id, age_group, postcode_group, income_range, occupation_group "
+            "FROM PROTECTED_DATA ORDER BY record_id LIMIT %s OFFSET %s",
+            (limit, offset),
+        )
+        records = cursor.fetchall()
+        cursor.close()
+
+    g.log_action = "protected_data_access"
+    g.log_records_returned = len(records)
+
+    return jsonify({"records": records, "count": len(records)})
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
