@@ -57,3 +57,21 @@ CREATE TABLE access_log (
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 ) ENGINE=InnoDB;
+
+
+-- ============================================================
+-- Security alerts (SCRUM-39)
+-- Stores flagged suspicious (ip, minute-window) events from
+-- extract_features.py: brute-force, high request rate, bulk access.
+-- ============================================================
+
+CREATE TABLE security_alerts (
+    alert_id     INT AUTO_INCREMENT PRIMARY KEY,
+    alert_type   VARCHAR(50) NOT NULL,
+    ip_address   VARCHAR(45) NOT NULL,
+    window_start DATETIME NOT NULL,
+    details      VARCHAR(255),
+    severity     VARCHAR(20) DEFAULT 'medium',
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_alert (alert_type, ip_address, window_start)
+) ENGINE=InnoDB;
