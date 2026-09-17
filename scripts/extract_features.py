@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from db.db_connection import get_connection  # noqa: E402
 
 
-HIGH_RATE_THRESHOLD = 10            # requests per minute from one IP
+HIGH_RATE_THRESHOLD = 20            # requests per minute from one IP
 FAILED_LOGIN_RATIO_THRESHOLD = 0.5  # 50% or more failed logins
 BULK_ACCESS_RECORD_THRESHOLD = 1000 # total records returned per minute from on IP
 
