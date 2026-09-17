@@ -13,7 +13,7 @@ import requests
 
 
 API_URL = "http://localhost:5001/"
-REQUEST_COUNT = 30
+REQUEST_COUNT = 40
 INTERVAL_SECONDS = 0.2
 REQUEST_TIMEOUT_SECONDS = 5
 
