@@ -157,6 +157,100 @@ The API only serves records from `PROTECTED_DATA`.
 The original `SYNTHETIC_DATA` table is retained for privacy analysis and comparison and is not exposed through the user-facing API.
 
 ---
+## Database Setup
+
+The project uses MySQL on the Ubuntu server.
+
+### 1. Create the Database
+
+Open MySQL as the local administrator:
+
+```bash
+sudo mysql
+```
+
+Create the project database:
+
+```sql
+CREATE DATABASE IF NOT EXISTS privacy_db;
+```
+
+Create a dedicated application user:
+
+```sql
+CREATE USER IF NOT EXISTS 'privacy_app'@'localhost'
+IDENTIFIED BY '<database-password>';
+```
+
+Grant the permissions required by the application:
+
+```sql
+GRANT SELECT, INSERT, UPDATE
+ON privacy_db.*
+TO 'privacy_app'@'localhost';
+
+FLUSH PRIVILEGES;
+```
+
+The application user is intentionally not granted `DELETE` privileges.
+
+Exit MySQL:
+
+```sql
+exit;
+```
+
+### 2. Create the Tables
+
+Apply the database schema:
+
+```bash
+sudo mysql privacy_db < schema.sql
+```
+
+This creates the tables used by the project:
+
+```text
+SYNTHETIC_DATA
+PROTECTED_DATA
+users
+access_log
+security_alerts
+```
+
+### 3. Configure Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=privacy_app
+DB_PASSWORD=<database-password>
+DB_NAME=privacy_db
+
+JWT_SECRET=<your-secret-key>
+```
+
+The `.env` file contains local credentials and secrets and should not be committed to GitHub.
+
+### 4. Test the Database Connection
+
+Activate the Python virtual environment:
+
+```bash
+source .venv/bin/activate
+```
+
+Test the database connection:
+
+```bash
+python src/db/db_connection.py
+```
+
+A successful connection confirms that the application can communicate with MySQL.
+
+---
 
 ## API
 
@@ -228,14 +322,6 @@ Activate the Python virtual environment:
 ```bash
 source .venv/bin/activate
 ```
-
-Check the database connection:
-
-```bash
-python src/db/db_connection.py
-```
-
-A successful connection should display the available database tables.
 
 Start the Flask API:
 
@@ -520,6 +606,23 @@ Instead, it retrieves data through the authenticated `/protected-data` API.
 ### Kali Authentication
 
 A valid JWT must first be obtained from the Ubuntu API and stored in the `API_TOKEN` environment variable.
+
+Use test credentials created for the local lab environment:
+
+```bash
+export API_TOKEN=$(curl -s -X POST http://192.168.56.10:5001/login \
+-H "Content-Type: application/json" \
+-d '{"username":"<test-username>","password":"<test-password>"}' \
+| python3 -c 'import sys,json; print(json.load(sys.stdin)["token"])')
+```
+
+Confirm that the token was stored:
+
+```bash
+echo ${#API_TOKEN}
+```
+
+Replace `<test-username>` and `<test-password>` with credentials created for the local lab environment.
 
 The token is then used by the bulk-access simulation.
 
